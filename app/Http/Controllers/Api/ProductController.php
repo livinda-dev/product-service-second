@@ -28,7 +28,11 @@ class ProductController extends Controller
             'sku' => ['required', 'string', 'max:100', 'unique:products,sku'],
             'price' => ['required', 'numeric', 'min:0'],
             'stock' => ['required', 'integer', 'min:0'],
-            'image' => ['nullable', 'string'],
+            'image' => ['nullable', 'string', 'max:10485760', function ($attribute, $value, $fail) {
+                if (! $this->isBase64Image($value)) {
+                    $fail('The image must be a valid base64 image string.');
+                }
+            }],
         ]);
 
         $product = Product::create($validated);
@@ -54,7 +58,11 @@ class ProductController extends Controller
             'sku' => ['sometimes', 'required', 'string', 'max:100', 'unique:products,sku,' . $product->id],
             'price' => ['sometimes', 'required', 'numeric', 'min:0'],
             'stock' => ['sometimes', 'required', 'integer', 'min:0'],
-            'image' => ['nullable', 'string'],
+            'image' => ['nullable', 'string', 'max:10485760', function ($attribute, $value, $fail) {
+                if (! $this->isBase64Image($value)) {
+                    $fail('The image must be a valid base64 image string.');
+                }
+            }],
         ]);
 
         $product->update($validated);
@@ -70,5 +78,24 @@ class ProductController extends Controller
         $product->delete();
 
         return response()->json(['message' => 'Deleted']);
+    }
+
+    private function isBase64Image(string $value): bool
+    {
+        $data = $value;
+
+        if (str_starts_with($data, 'data:')) {
+            $commaPosition = strpos($data, ',');
+            if ($commaPosition === false) {
+                return false;
+            }
+            $data = substr($data, $commaPosition + 1);
+        }
+
+        if ($data === '') {
+            return false;
+        }
+
+        return base64_decode($data, true) !== false;
     }
 }

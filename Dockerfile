@@ -8,7 +8,7 @@ RUN apk add --no-cache \
     libzip \
     libpng \
     freetype \
-    jpeg-turbo \
+    libjpeg-turbo \
     oniguruma
 
 RUN apk add --no-cache --virtual .build-deps \
@@ -17,7 +17,7 @@ RUN apk add --no-cache --virtual .build-deps \
     libzip-dev \
     libpng-dev \
     freetype-dev \
-    jpeg-turbo-dev \
+    libjpeg-turbo-dev \
     oniguruma-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) pdo_mysql mbstring bcmath intl zip gd \
