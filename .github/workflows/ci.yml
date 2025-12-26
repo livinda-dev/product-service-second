@@ -9,42 +9,28 @@ on:
       - main
 
 jobs:
-  tests:
+  ci:
     runs-on: ubuntu-latest
-    env:
-      APP_ENV: testing
-      APP_KEY: base64:PiJ6fhwB8VxmPm1UNJgEYDhqmIRW06haLQYF8Xv04Whe
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2"
-          coverage: none
-
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-
-      - name: Cache Composer packages
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
+          php-version: 8.4
+          extensions: mbstring, pdo, pdo_mysql
 
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
+        working-directory: src
+        run: composer install --no-interaction --prefer-dist
 
-      - name: Prepare environment
+      - name: Prepare app
+        working-directory: src
         run: |
-          if [ -f .env.example ] && [ ! -f .env ]; then
-            cp .env.example .env
-          fi
-          php artisan key:generate --force
+          cp .env.example .env
+          php artisan key:generate
 
       - name: Run tests
-        run: composer test
+        working-directory: src
+        run: php artisan test
