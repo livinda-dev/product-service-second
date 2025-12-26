@@ -22,15 +22,12 @@ jobs:
           extensions: mbstring, pdo, pdo_mysql
 
       - name: Install dependencies
-        working-directory: src
         run: composer install --no-interaction --prefer-dist
 
       - name: Prepare app
-        working-directory: src
         run: |
           cp .env.example .env
           php artisan key:generate
 
       - name: Run tests
-        working-directory: src
         run: php artisan test
